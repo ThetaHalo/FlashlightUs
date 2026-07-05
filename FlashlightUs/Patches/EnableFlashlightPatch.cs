@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System;
+using AmongUs.Data;
+using HarmonyLib;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 
@@ -13,7 +15,29 @@ public static class EnableFlashlightPatch
         var isEnabled = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
 
         __result = isEnabled;
+
+        DestroyableSingleton<HudManager>.Instance.ToggleRightJoystick(true);
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(HudManager), "SetTouchType")] // fixes issue where the right joystick is not shown
+public static class ForceRightJoystickPatch
+{
+    public static bool Prepare => OperatingSystem.IsAndroid();
+    public static void Postfix(HudManager __instance, ControlTypes type)
+    {
+        if (__instance.joystickR != null) return;
+
+        bool shouldEnable = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
+        if (!shouldEnable) return;
+
+        var instance = Object.Instantiate(__instance.RightVJoystick, __instance.transform, false);
+        if (instance == null) return;
+
+        __instance.joystickR = instance.GetComponent<VirtualJoystick>();
+        __instance.joystickR.ToggleVisuals(LobbyBehaviour.Instance == null);
+        __instance.SetJoystickSize(DataManager.Settings.Input.TouchJoystickSize);
     }
 }
 
