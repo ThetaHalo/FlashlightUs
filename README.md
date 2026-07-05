@@ -12,6 +12,8 @@
 This mod adds the Flashlight Mode from Hide & Seek to the Normal Mode.<br><br>
 You may use this in public lobbies, however members of the lobby will also require the mod to be installed in order to use flashlights. You may enable the `Kick Unmodded Players` option if you wish to require everyone in the lobby to be using the mod.
 
+Notice: The flashlight distance follows the host's vision setting, meaning you can still see only as far as the host intends you to. This will not be configurable as it would be considered cheating to see farther than you should be able to.
+
 |          Option          | Description                                                   |
 |:------------------------:|---------------------------------------------------------------|
 |    Enable Flashlight     | Enables the Flashlight (for you).                             |
@@ -19,3 +21,15 @@ You may use this in public lobbies, however members of the lobby will also requi
 |  Kick Unmodded Players   | Kicks players who are not using the mod.                      |
 | Crewmate Flashlight Size | Changes the flashlight width as Crewmate-based roles.         |
 | Impostor Flashlight Size | Changes the flashlight width as Impostor-based roles.         |                    
+
+__Any mod not listed here has not been tested. If you want your mod to be listed here and are willing to test it, please create an issue.__
+
+|   Mod Compatibility    | Status                   |
+|:----------------------:|:-------------------------| 
+|     Project: Lotus     | Incompatible ❌           | 
+|   Endless Host Roles   | Potentially Compatible ❓ |
+
+## Gallery
+<img src=".github/1_options.png" width="50%" />
+<br><br>
+<img src=".github/2_gameplay.png" width="50%" />

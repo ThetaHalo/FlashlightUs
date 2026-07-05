@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using InnerNet;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 

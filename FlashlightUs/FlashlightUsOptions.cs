@@ -1,7 +1,6 @@
 ﻿using VentLib.Options;
 using VentLib.Options.UI;
 using VentLib.Options.UI.Tabs;
-using VentLib.Options.UI.Controllers;
 using VentLib.Utilities.Attributes;
 
 namespace FlashlightUs;

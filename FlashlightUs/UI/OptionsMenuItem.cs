@@ -1,10 +1,9 @@
 ﻿using System;
-using BepInEx.Configuration;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using VentLib.Utilities.Extensions;
-using Object = UnityEngine.Object;
+
 
 namespace FlashlightUs.UI;
 
@@ -70,8 +69,8 @@ public class OptionsMenuItem
     }
     
     // sliders
-     private OptionsMenuItem(string label, string objectName, Func<float> getValue, Action<float> setValue, FloatRange range, 
-         OptionsMenuBehaviour optionsMenuBehaviour, float? snapStep = null)
+    private OptionsMenuItem(string label, string objectName, Func<float> getValue, Action<float> setValue, FloatRange range, 
+        OptionsMenuBehaviour optionsMenuBehaviour, float? snapStep = null)
     {
         try
         {

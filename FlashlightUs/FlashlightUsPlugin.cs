@@ -1,7 +1,7 @@
 ﻿global using VentLib.Logging;
+global using Object = UnityEngine.Object;
 using System.Reflection;
 using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using FlashlightUs;
 using HarmonyLib;
@@ -29,7 +29,7 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
     public const string MajorVersion = "1";
     public const string MinorVersion = "0";
     public const string PatchVersion = "0";
-    public const string BuildNumber = "0070";
+    public const string BuildNumber = "0071";
 
     public readonly GitVersion CurrentVersion = new(typeof(FlashlightUsPlugin).Assembly);
     public GitVersion Version() => CurrentVersion;
