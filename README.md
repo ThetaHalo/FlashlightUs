@@ -1,4 +1,4 @@
-<img align="left" alt="Cover" src=".github/icon.png" width="25%" />  
+<img align="left" alt="Cover" src=".github/logo.png" width="25%" />  
 <h1 align="center">FlashlightUs</h1>
 
 > ### __A mod for the Among Us game__<br>
@@ -30,6 +30,6 @@ __Any mod not listed here has not been tested. If you want your mod to be listed
 |   Endless Host Roles   | Potentially Compatible ❓ |
 
 ## Gallery
-<img src=".github/1_options.png" width="50%" />
+<img src=".github/1_options.png" width="100%" />
 <br><br>
-<img src=".github/2_gameplay.png" width="50%" />
+<img src=".github/2_gameplay.png" width="100%" />
