@@ -1,98 +1,53 @@
 ﻿using System;
 using BepInEx.Configuration;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using VentLib.Utilities.Extensions;
 using Object = UnityEngine.Object;
 
 namespace FlashlightUs.UI;
 
 // https://github.com/Hyz-sui/TownOfHost-H/blob/e30daf2f851eb0dc4f8b23556227dcd7406ac4dc/Modules/OptionsMenu.cs
-// TODO: Re-create this in order to support certain mods
+// TODO: Re-create this or refactor in order to support more advanced mods
 public class OptionsMenuItem
 {
-    public ConfigEntry<bool> Config;
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(FlashlightUsPlugin));
     public ToggleButtonBehaviour ToggleButton;
+    public SlideBar SlideBar;
+    public string Label;
+    
+    private readonly Func<bool> getValue;
+    private readonly Action<bool> setValue;
+    
+    private readonly Func<float> getFloatValue;
+    private readonly Action<float> setFloatValue;
+    private readonly FloatRange floatRange;
+    
+    private static OptionsMenuBehaviour behaviour;
 
     public static SpriteRenderer CustomBackground;
     private static int numOptions = 0;
 
-    private OptionsMenuItem(string label, string objectName, ConfigEntry<bool> config, OptionsMenuBehaviour optionsMenuBehaviour, Action additionalOnClickAction = null)
+    // for buttons
+    private OptionsMenuItem(string label, string objectName, Func<bool> getValue, Action<bool> setValue, OptionsMenuBehaviour optionsMenuBehaviour, Action additionalOnClickAction = null)    
     {
         try
         {
-            Config = config;
+            this.getValue = getValue;
+            this.setValue = setValue;
+            Label = label;
 
             var mouseMoveToggle = optionsMenuBehaviour.DisableMouseMovement;
+            
 
-            // 1つ目のボタンの生成時に背景も生成
-            if (CustomBackground == null)
-            {
-                numOptions = 0;
-                CustomBackground = Object.Instantiate(optionsMenuBehaviour.Background, optionsMenuBehaviour.transform);
-                CustomBackground.name = "CustomBackground";
-                CustomBackground.transform.localScale = new(0.9f, 0.9f, 1f);
-                CustomBackground.transform.localPosition += Vector3.back * 8;
-                CustomBackground.gameObject.SetActive(false);
-
-                var closeButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
-                closeButton.transform.localPosition = new(1.3f, -2.3f, -6f);
-                closeButton.name = "Close";
-                closeButton.Text.text = Translations.OptionsMenu.Close;
-                closeButton.Background.color = Palette.DisabledGrey;
-                var closePassiveButton = closeButton.GetComponent<PassiveButton>();
-                closePassiveButton.OnClick = new();
-                closePassiveButton.OnClick.AddListener(new Action(() =>
-                {
-                    CustomBackground.gameObject.SetActive(false);
-                }));
-
-                UiElement[] selectableButtons = optionsMenuBehaviour.ControllerSelectable.ToArray();
-                PassiveButton leaveButton = null;
-                PassiveButton returnButton = null;
-                for (int i = 0; i < selectableButtons.Length; i++)
-                {
-                    var button = selectableButtons[i];
-                    if (button == null)
-                    {
-                        continue;
-                    }
-
-                    if (button.name == "LeaveGameButton")
-                    {
-                        leaveButton = button.GetComponent<PassiveButton>();
-                    }
-                    else if (button.name == "ReturnToGameButton")
-                    {
-                        returnButton = button.GetComponent<PassiveButton>();
-                    }
-                }
-                var generalTab = mouseMoveToggle.transform.parent.parent.parent;
-
-                var modOptionsButton = Object.Instantiate(mouseMoveToggle, generalTab);
-                modOptionsButton.transform.localPosition = leaveButton?.transform?.localPosition ?? new(0f, -2.4f, 1f);
-                modOptionsButton.name = "ModOptionsButton";
-                modOptionsButton.Text.text = Translations.ModName;
-                modOptionsButton.Background.color = new Color32(0x00, 0xbf, 0xff, 0xff);
-                var modOptionsPassiveButton = modOptionsButton.GetComponent<PassiveButton>();
-                modOptionsPassiveButton.OnClick = new();
-                modOptionsPassiveButton.OnClick.AddListener(new Action(() =>
-                {
-                    CustomBackground.gameObject.SetActive(true);
-                }));
-
-                if (leaveButton != null)
-                {
-                    leaveButton.transform.localPosition = new(-1.35f, -2.411f, -1f);
-                }
-                if (returnButton != null)
-                {
-                    returnButton.transform.localPosition = new(1.35f, -2.411f, -1f);
-                }
-            }
-
-            // ボタン生成
+            // Create menu if null
+            if (CustomBackground == null) CreateOptionsMenu(optionsMenuBehaviour, mouseMoveToggle);
+            
+            // Generate Buttons (google translated)
             ToggleButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
             ToggleButton.transform.localPosition = new Vector3(
-                // 現在のオプション数を基に位置を計算
+                // Calculate the position based on the current number of options. (google translated)
                 numOptions % 2 == 0 ? -1.3f : 1.3f,
                 2.2f - (0.5f * (numOptions / 2)),
                 -6f);
@@ -102,7 +57,7 @@ public class OptionsMenuItem
             passiveButton.OnClick = new();
             passiveButton.OnClick.AddListener(new Action(() =>
             {
-                config.Value = !config.Value;
+                setValue(!getValue());
                 UpdateToggle();
                 additionalOnClickAction?.Invoke();
             }));
@@ -113,24 +68,198 @@ public class OptionsMenuItem
             numOptions++;
         }
     }
-
-    public static OptionsMenuItem Create(string label, string objectName, ConfigEntry<bool> config, OptionsMenuBehaviour optionsMenuBehaviour, Action additionalOnClickAction = null)
+    
+    // sliders
+     private OptionsMenuItem(string label, string objectName, Func<float> getValue, Action<float> setValue, FloatRange range, 
+         OptionsMenuBehaviour optionsMenuBehaviour, float? snapStep = null)
     {
-        return new(label, objectName, config, optionsMenuBehaviour, additionalOnClickAction);
+        try
+        {
+            getFloatValue = getValue;
+            setFloatValue = setValue;
+            floatRange = range;
+            Label = label;
+
+            var mouseMoveToggle = optionsMenuBehaviour.DisableMouseMovement;
+            var musicSlider = optionsMenuBehaviour.MusicSlider;
+
+            // Create menu if null
+            if (CustomBackground == null) CreateOptionsMenu(optionsMenuBehaviour, mouseMoveToggle);
+
+            // sliders take a whole row, if there's only 1 button, we just skip
+            if (numOptions % 2 != 0) numOptions++;
+
+            SlideBar = Object.Instantiate(musicSlider, CustomBackground.transform);
+
+            SlideBar.GetComponentInChildren<TextTranslatorTMP>(true)?.DestroyImmediate();
+
+            SlideBar.transform.localPosition = new Vector3(-2.1f, 2.2f - (0.5f * (numOptions / 2)), -6f);
+            SlideBar.name = objectName;
+
+            SlideBar.OnValueChange = new UnityEvent();
+            SlideBar.Value = range.ReverseLerp(getValue());
+            SlideBar.UpdateValue();
+            UpdateSlider();
+
+            SlideBar.OnValueChange.AddListener(new Action(() =>
+            {
+                float real = floatRange.Lerp(SlideBar.Value);
+
+                // if snap then snap
+                if (snapStep.HasValue && snapStep.Value > 0f)
+                {
+                    real = Mathf.Round(real / snapStep.Value) * snapStep.Value;
+                    SlideBar.Value = floatRange.ReverseLerp(real);
+                    SlideBar.UpdateValue();
+                    UpdateSlider();
+                }
+                
+                SetTitle(SlideBar, Label, real);
+                setFloatValue(real);
+            }));
+            numOptions++;
+        }
+        finally
+        {
+            numOptions++;
+        }
+    }
+
+    public static void CreateOptionsMenu(OptionsMenuBehaviour optionsMenuBehaviour, ToggleButtonBehaviour mouseMoveToggle)
+    {
+        behaviour = optionsMenuBehaviour;
+        numOptions = 0;
+        CustomBackground = Object.Instantiate(optionsMenuBehaviour.Background, optionsMenuBehaviour.transform);
+        CustomBackground.name = "FlashlightUsOptionsMenu";
+        CustomBackground.transform.localScale = new(0.9f, 0.9f, 1f);
+        CustomBackground.transform.localPosition += Vector3.back * 8;
+        CustomBackground.gameObject.SetActive(false);
+
+        var closeButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
+        closeButton.transform.localPosition = new(1.3f, -2.3f, -6f);
+        closeButton.name = "Close";
+        closeButton.Text.text = Translations.OptionsMenu.Close;
+        closeButton.Background.color = Palette.DisabledGrey;
+        var closePassiveButton = closeButton.GetComponent<PassiveButton>();
+        closePassiveButton.OnClick = new();
+        closePassiveButton.OnClick.AddListener(new Action(() => { CustomBackground.gameObject.SetActive(false); }));
+
+        UiElement[] selectableButtons = optionsMenuBehaviour.ControllerSelectable.ToArray();
+        PassiveButton leaveButton = null;
+        PassiveButton returnButton = null;
+        for (int i = 0; i < selectableButtons.Length; i++)
+        {
+            var button = selectableButtons[i];
+            if (button == null)
+            {
+                continue;
+            }
+
+            if (button.name == "LeaveGameButton")
+            {
+                leaveButton = button.GetComponent<PassiveButton>();
+            }
+            else if (button.name == "ReturnToGameButton")
+            {
+                returnButton = button.GetComponent<PassiveButton>();
+            }
+        }
+
+        var generalTab = mouseMoveToggle.transform.parent.parent.parent;
+
+        var modOptionsButton = Object.Instantiate(mouseMoveToggle, generalTab);
+        modOptionsButton.transform.localPosition = new(-4f, 2f, -6f);
+        modOptionsButton.name = "ModOptionsButton";
+        modOptionsButton.Text.text = Translations.ModName;
+        modOptionsButton.Background.color = Color.yellow;
+        var modOptionsPassiveButton = modOptionsButton.GetComponent<PassiveButton>();
+        modOptionsPassiveButton.OnClick = new();
+        modOptionsPassiveButton.OnClick.AddListener(new Action(() => { CustomBackground.gameObject.SetActive(true); }));
+
+        if (leaveButton != null)
+        {
+            leaveButton.transform.localPosition = new(-1.35f, -2.411f, -1f);
+        }
+
+        if (returnButton != null)
+        {
+            returnButton.transform.localPosition = new(1.35f, -2.411f, -1f);
+        }
+    }
+    
+    public static void OpenMenu()
+    {
+        if (behaviour == null)
+        {
+            log.Warn("Behaviour is null, not opening menu.");
+            return;
+        }
+        
+        if (CustomBackground == null)
+        {
+            log.Exception("CustomBackground is null, not opening menu.");
+            return;
+        };
+        behaviour.gameObject.SetActive(true);
+        CustomBackground.gameObject.SetActive(true);
+    }
+    
+    public static void CloseMenu()
+    {
+        if (behaviour == null)
+        {
+            log.Warn("Behaviour is null, can't close menu.");
+            return;
+        }
+        
+        if (CustomBackground == null)
+        {
+            log.Exception("CustomBackground is null, can't clos menu.");
+            return;
+        };
+        behaviour.gameObject.SetActive(false);
+        CustomBackground.gameObject.SetActive(false);
+    }
+
+    public static OptionsMenuItem Create(string label, string objectName, Func<bool> getValue, Action<bool> setValue,
+        OptionsMenuBehaviour optionsMenuBehaviour, Action additionalOnClickAction = null)
+    {
+        return new(label, objectName, getValue, setValue, optionsMenuBehaviour, additionalOnClickAction);
+    }
+    
+    public static OptionsMenuItem CreateSlider(string label, string objectName, Func<float> getValue, Action<float> setValue,
+        FloatRange range, OptionsMenuBehaviour optionsMenuBehaviour, float? snapStep = null)
+    {
+        return new OptionsMenuItem(label, objectName, getValue, setValue, range, optionsMenuBehaviour, snapStep);
     }
 
     public void UpdateToggle()
     {
-        if (ToggleButton == null)
-        {
-            return;
-        }
+        if (ToggleButton == null) return;
 
-        var color = Config.Value ? Color.green : Color.red;
+        var color = getValue() ? Color.green : Color.red;
         ToggleButton.Background.color = color;
         if (ToggleButton.Rollover != null)
         {
             ToggleButton.Rollover.ChangeOutColor(color);
         }
+    }
+    
+    public void UpdateSlider()
+    {
+        if (SlideBar == null) return;
+        
+        SetTitle(SlideBar, Label, getFloatValue());
+        SlideBar.Value = floatRange.ReverseLerp(getFloatValue());
+        SlideBar.UpdateValue();
+    }
+
+    private void SetTitle(SlideBar slider, string title, float value)
+    {
+        slider.gameObject.GetComponentInChildren<TextTranslatorTMP>(true)?.DestroyImmediate();
+        var titleText = slider.gameObject.GetComponentInChildren<TextMeshPro>(true);
+        if (titleText == null) return;
+
+        titleText.text = $"{title}\n{value:0.00}x";
     }
 }
