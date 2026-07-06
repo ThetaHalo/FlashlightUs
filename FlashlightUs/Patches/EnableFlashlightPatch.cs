@@ -23,7 +23,7 @@ public static class EnableFlashlightPatch
 [HarmonyPatch(typeof(HudManager), "SetTouchType")] // fixes issue where the right joystick is not shown
 public static class ForceRightJoystickPatch
 {
-    public static bool Prepare => OperatingSystem.IsAndroid();
+    public static bool Prepare() => OperatingSystem.IsAndroid();
     public static void Postfix(HudManager __instance, ControlTypes type)
     {
         if (!OperatingSystem.IsAndroid()) return;
