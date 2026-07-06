@@ -15,8 +15,7 @@ public static class EnableFlashlightPatch
         var isEnabled = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
 
         __result = isEnabled;
-
-        DestroyableSingleton<HudManager>.Instance.ToggleRightJoystick(true);
+        
         return false;
     }
 }
@@ -27,6 +26,7 @@ public static class ForceRightJoystickPatch
     public static bool Prepare => OperatingSystem.IsAndroid();
     public static void Postfix(HudManager __instance, ControlTypes type)
     {
+        if (!OperatingSystem.IsAndroid()) return;
         if (__instance.joystickR != null) return;
 
         bool shouldEnable = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
