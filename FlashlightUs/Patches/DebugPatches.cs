@@ -2,6 +2,7 @@
 
 namespace FlashlightUs.Patches;
 
+// These patches exist because i test without any mod that has a no-game-end option, so ignore them. ty
 [HarmonyPatch]
 public static class DebugPatches
 {

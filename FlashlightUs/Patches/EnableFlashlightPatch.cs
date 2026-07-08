@@ -11,7 +11,9 @@ public static class EnableFlashlightPatch
 {
     public static bool Prefix(ref bool __result)
     {
+        if (Utilities.IsHNS()) return true;
         if (LobbyBehaviour.Instance != null) return true;
+        
         var isEnabled = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
 
         __result = isEnabled;
@@ -26,7 +28,7 @@ public static class ForceRightJoystickPatch
     public static bool Prepare() => OperatingSystem.IsAndroid();
     public static void Postfix(HudManager __instance, ControlTypes type)
     {
-        if (!OperatingSystem.IsAndroid()) return;
+        if (Utilities.IsHNS()) return;
         if (__instance.joystickR != null) return;
 
         bool shouldEnable = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
@@ -41,12 +43,13 @@ public static class ForceRightJoystickPatch
     }
 }
 
-// trying to change HNS options will result in a nullref, so we patch this instead to properly change it.
+// trying to change HNS options will result in a nullref, so we patch this instead to properly change the size.
 [HarmonyPatch(typeof(LightSource), "SetupLightingForGameplay")]
 public static class SetupLightingPatch
 {
     public static void Prefix(LightSource __instance, ref float flashlightSize, Transform touchFlashlightTarget)
     {
+        if (Utilities.IsHNS()) return;
         var pc = __instance.GetComponentInParent<PlayerControl>();
         if (pc == null) return;
 

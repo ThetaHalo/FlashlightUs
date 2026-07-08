@@ -1,7 +1,6 @@
-﻿using FlashlightUs.UI;
-using HarmonyLib;
+﻿using HarmonyLib;
 
-namespace FlashlightUs.Patches;
+namespace FlashlightUs.UI.Patches;
 
 [HarmonyPatch(typeof(OptionsMenuBehaviour))]
 public class ModOptionsMenuPatches

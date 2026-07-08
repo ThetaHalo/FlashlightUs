@@ -6,9 +6,7 @@ using BepInEx.Unity.IL2CPP;
 using FlashlightUs;
 using HarmonyLib;
 using VentLib;
-using VentLib.Utilities.Extensions;
 using VentLib.Version;
-using VentLib.Version.BuiltIn;
 using VentLib.Version.Git;
 using VentLib.Version.Updater;
 
@@ -17,7 +15,7 @@ namespace FlashlightUs;
 
 [BepInPlugin(Id, "FlashlightUs", ModVersion)]
 [BepInProcess("Among Us.exe")]
-[BepInIncompatibility("com.discussions.LotusContinued")] // incompatible due to custom options menu
+[BepInIncompatibility("com.discussions.LotusContinued")] // incompatible due to PL's custom options menu, I'm going to add compatibility later.
 [BepInDependency(Vents.Id)]
 public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
 {
@@ -44,8 +42,6 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
         
         Harmony.PatchAll();
         log.Info("FlashlightUs loaded!");
-        
-        Assembly.GetExecutingAssembly().GetManifestResourceNames().ForEach(s => log.Info(s));
     }
 
     public FlashlightUsPlugin()
@@ -58,16 +54,29 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
         ModUpdater.EstablishConnection();
     }
 
-    public void OnJoin(Version version, PlayerControl player)
+    // we ping instead of relying on vf stuff due to other vf mods possibly interfering with the proper way to check
+    public void OnJoin(Version version, PlayerControl player) 
     {
         if (player == null) return;
-        if (version is not NoVersion) return;
-        if (!FlashlightUsOptions.KickUnmoddedPlayersValue)
+        
+        FlashlightUsNetworking.SendIDPing(player, isFlashlightUs =>
         {
-            Utilities.SendNotification($"{player.name} does not have FlashlightUs installed.", Utilities.LoadSprite("FlashlightUs.assets.logo.png", 500f));
-            return;
-        }
-        log.Info($"Kicking unmodded player: {player.name}");
-        player.KickWithMessage("was kicked due to not having FlashlightUs installed.");
+            if (isFlashlightUs)
+            {
+                log.Info($"{player.name} is using FlashlightUs!");
+                Utilities.SendNotification($"{player.name} is using FlashlightUs!", Utilities.LoadSprite("FlashlightUs.assets.logo.png", 500f));
+                return;
+            }
+            
+            if (!FlashlightUsOptions.KickUnmoddedPlayersValue)
+            {
+                log.Info($"{player.name} does not have FlashlightUs installed.");
+                Utilities.SendNotification($"{player.name} does not have FlashlightUs installed.", Utilities.LoadSprite("FlashlightUs.assets.logo.png", 500f));
+                return;
+            }
+            
+            log.Info($"Kicking unmodded player: {player.name}");
+            player.KickWithMessage("was kicked due to not having FlashlightUs installed.");
+        });
     }
 }
