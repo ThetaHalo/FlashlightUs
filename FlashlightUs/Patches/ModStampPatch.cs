@@ -13,7 +13,7 @@ class ModStampPatch
 
         if (Input.GetKeyDown(KeyCode.F9)) // open options
         {
-            if (OptionsMenuItem.CustomBackground != null && OptionsMenuItem.CustomBackground.gameObject.activeSelf) OptionsMenuItem.CloseMenu();
+            if (OptionsMenuItem.OptionsBaseMenu != null && OptionsMenuItem.OptionsBaseMenu.gameObject.activeSelf) OptionsMenuItem.CloseMenu();
             else OptionsMenuItem.OpenMenu();
         }
 

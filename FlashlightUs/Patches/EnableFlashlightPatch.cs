@@ -2,6 +2,7 @@
 using AmongUs.Data;
 using HarmonyLib;
 using UnityEngine;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace FlashlightUs.Patches;
@@ -12,7 +13,7 @@ public static class EnableFlashlightPatch
     public static bool Prefix(ref bool __result)
     {
         if (Utilities.IsHNS()) return true;
-        if (LobbyBehaviour.Instance != null) return true;
+        if (LobbyBehaviour.Instance != null && !FlashlightUsOptions.EnableFlashlightInLobbyValue) return true;
         
         var isEnabled = FlashlightUsOptions.EnableFlashlightValue || (FlashlightUsOptions.ForceFlashlightValue && !PlayerControl.LocalPlayer.IsHost());
 
@@ -57,5 +58,19 @@ public static class SetupLightingPatch
         flashlightSize = isImpostor
             ? FlashlightUsOptions.ImpostorFlashlightSizeValue
             : FlashlightUsOptions.CrewmateFlashlightSizeValue;
+    }
+}
+
+[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameJoined))] 
+public static class EnableFlashlightInLobbyPatch
+{
+    public static void Postfix()
+    {
+        FlashlightUsNetworking.HostHasMod = AmongUsClient.Instance.AmHost;
+        if (!FlashlightUsOptions.EnableFlashlightInLobbyValue) return;
+        Async.WaitUntil(() => PlayerControl.LocalPlayer, p => p != null, p =>
+        {
+            PlayerControl.LocalPlayer?.AdjustLighting();
+        }, 0.25f, 20);
     }
 }

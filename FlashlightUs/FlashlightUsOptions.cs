@@ -15,6 +15,7 @@ public static class FlashlightUsOptions
         OptionManager.GetManager(file: "FlashlightUs_Client.txt", managerFlags: OptionManagerFlags.IgnorePreset);
     
     public static GameOption EnableFlashlight;
+    public static GameOption EnableFlashlightInLobby;
     public static GameOption ForceFlashlight;
     public static GameOption KickUnmoddedPlayers;
     public static GameOption CrewmateFlashlightSize;
@@ -33,6 +34,10 @@ public static class FlashlightUsOptions
             if (LobbyBehaviour.Instance == null)
                 Utilities.SendNotification($"The flashlight will be changed when you next enter the lobby.",
                     Utilities.LoadSprite("FlashlightUs.assets.logo.png", 500f));
+            else
+            {
+                if (PlayerControl.LocalPlayer != null) AdjustLighting();
+            }
         }
     }
 
@@ -44,6 +49,18 @@ public static class FlashlightUsOptions
             if (field == value) return;
             field = value;
             ForceFlashlight.SetHardValue(value);
+        }
+    }
+
+    public static bool EnableFlashlightInLobbyValue
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            EnableFlashlightInLobby.SetHardValue(value);
+            if (PlayerControl.LocalPlayer != null) AdjustLighting();
         }
     }
 
@@ -66,6 +83,7 @@ public static class FlashlightUsOptions
             if (Mathf.Approximately(field, value)) return;
             field = value;
             CrewmateFlashlightSize.SetHardValue(value);
+            AdjustLighting();
         }
     }
 
@@ -77,6 +95,7 @@ public static class FlashlightUsOptions
             if (Mathf.Approximately(field, value)) return;
             field = value;
             ImpostorFlashlightSize.SetHardValue(value);
+            AdjustLighting();
         }
     }
 
@@ -105,6 +124,16 @@ public static class FlashlightUsOptions
             })
             .AddBoolean(false)
             .BuildAndRegister(OptionManager);
+
+        EnableFlashlightInLobby = new GameOptionBuilder()
+            .KeyName("Enable Flashlight in Lobby", Translations.OptionsMenu.EnableFlashlightInLobby)
+            .BindBool(b =>
+            {
+                EnableFlashlightInLobbyValue = b;
+                ClientOptionManager.DelaySave(0);
+            })
+            .AddBoolean(false)
+            .BuildAndRegister(ClientOptionManager);
 
         KickUnmoddedPlayers = new GameOptionBuilder()
             .KeyName("Kick Unmodded Players", Translations.OptionsMenu.KickUnmoddedPlayers)
@@ -145,5 +174,33 @@ public static class FlashlightUsOptions
     public static void AdjustImpostorFlashlightSize(float f)
     {
         ImpostorFlashlightSizeValue = f;
+    }
+
+    public static void AdjustLighting()
+    {
+        bool amHost = AmongUsClient.Instance.AmHost;
+        bool inLobby = LobbyBehaviour.Instance != null;
+        bool anyModdedPlayers = FlashlightUsNetworking.ConfirmedPlayers.Count == 0;
+
+        if (inLobby && amHost)
+        {
+            Utilities.RunWithLogging(() => PlayerControl.LocalPlayer.AdjustLighting(),
+                $"AdjustLighting, in lobby and am host. HostHasMod={FlashlightUsNetworking.HostHasMod}");
+        }
+        else if (!amHost && !FlashlightUsNetworking.HostHasMod)
+        {
+            Utilities.RunWithLogging(() => PlayerControl.LocalPlayer.AdjustLighting(),
+                $"AdjustLighting, not host, HostHasMod={FlashlightUsNetworking.HostHasMod}");
+        }
+        else if (!anyModdedPlayers && amHost)
+        {
+            Utilities.RunWithLogging(() => PlayerControl.LocalPlayer.AdjustLighting(),
+                $"AdjustLighting, am host, HostHasMod={FlashlightUsNetworking.HostHasMod}");
+        }
+        else
+        {
+            Utilities.SendNotification("The flashlight will be changed when you next enter the lobby (if you are the host).",
+                Utilities.LoadSprite("FlashlightUs.assets.logo.png", 500f));
+        }
     }
 }

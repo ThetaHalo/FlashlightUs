@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -24,9 +25,18 @@ public class OptionsMenuItem
     private readonly FloatRange floatRange;
     
     private static OptionsMenuBehaviour behaviour;
-
-    public static SpriteRenderer CustomBackground;
+    
+    public static GenericPopup popup2;
+    public static GenericPopup OptionsBaseMenu;
+    public static PassiveButton MenuButton;
+    
+    private static ToggleButtonBehaviour modOptionsButton;
+    public static PassiveButton modOptionsButtonV2;
+    
     private static int numOptions = 0;
+    
+    private static OptionsMenuBehaviour builtFor;
+    private static readonly List<GameObject> spawnedItems = new();
 
     // for buttons
     private OptionsMenuItem(string label, string objectName, Func<bool> getValue, Action<bool> setValue, OptionsMenuBehaviour optionsMenuBehaviour, Action additionalOnClickAction = null)    
@@ -38,13 +48,14 @@ public class OptionsMenuItem
             Label = label;
 
             var mouseMoveToggle = optionsMenuBehaviour.DisableMouseMovement;
-            
 
-            // Create menu if null
-            if (CustomBackground == null) CreateOptionsMenu(optionsMenuBehaviour, mouseMoveToggle);
+            // Create menu
+            CheckMenu(optionsMenuBehaviour);
             
             // Generate Buttons (google translated)
-            ToggleButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
+            ToggleButton = Object.Instantiate(mouseMoveToggle, OptionsBaseMenu.transform);
+            ToggleButton.gameObject.SetActive(true);
+            spawnedItems.Add(ToggleButton.gameObject);
             ToggleButton.transform.localPosition = new Vector3(
                 // Calculate the position based on the current number of options. (google translated)
                 numOptions % 2 == 0 ? -1.3f : 1.3f,
@@ -83,12 +94,13 @@ public class OptionsMenuItem
             var musicSlider = optionsMenuBehaviour.MusicSlider;
 
             // Create menu if null
-            if (CustomBackground == null) CreateOptionsMenu(optionsMenuBehaviour, mouseMoveToggle);
+            CheckMenu(optionsMenuBehaviour);
 
             // sliders take a whole row, if there's only 1 button, we just skip
             if (numOptions % 2 != 0) numOptions++;
 
-            SlideBar = Object.Instantiate(musicSlider, CustomBackground.transform);
+            SlideBar = Object.Instantiate(musicSlider, OptionsBaseMenu.transform);
+            spawnedItems.Add(SlideBar.gameObject);
 
             SlideBar.GetComponentInChildren<TextTranslatorTMP>(true)?.DestroyImmediate();
 
@@ -123,101 +135,111 @@ public class OptionsMenuItem
             numOptions++;
         }
     }
-
-    public static void CreateOptionsMenu(OptionsMenuBehaviour optionsMenuBehaviour, ToggleButtonBehaviour mouseMoveToggle)
+    
+    private static void CheckMenu(OptionsMenuBehaviour optionsMenuBehaviour)
     {
-        behaviour = optionsMenuBehaviour;
+        
+        log.Trace($"CheckMenu called. builtFor == optionsMenuBehaviour: {builtFor == optionsMenuBehaviour}");
+
+        if (builtFor == optionsMenuBehaviour) return;
+
+        foreach (var go in spawnedItems)
+        {
+            if (go != null) Object.Destroy(go);
+        }
+        spawnedItems.Clear();
         numOptions = 0;
-        CustomBackground = Object.Instantiate(optionsMenuBehaviour.Background, optionsMenuBehaviour.transform);
-        CustomBackground.name = "FlashlightUsOptionsMenu";
-        CustomBackground.transform.localScale = new(0.9f, 0.9f, 1f);
-        CustomBackground.transform.localPosition += Vector3.back * 8;
-        CustomBackground.gameObject.SetActive(false);
+        
+        if (modOptionsButtonV2 != null) Object.Destroy(modOptionsButtonV2.gameObject);
+        modOptionsButtonV2 = null;
+        
+        builtFor = optionsMenuBehaviour;
 
-        var closeButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
-        closeButton.transform.localPosition = new(1.3f, -2.3f, -6f);
-        closeButton.name = "Close";
-        closeButton.Text.text = Translations.OptionsMenu.Close;
-        closeButton.Background.color = Palette.DisabledGrey;
-        var closePassiveButton = closeButton.GetComponent<PassiveButton>();
-        closePassiveButton.OnClick = new();
-        closePassiveButton.OnClick.AddListener(new Action(() => { CustomBackground.gameObject.SetActive(false); }));
+        CreateOptionsMenuV2(optionsMenuBehaviour);
+    }
+    
+    public static void CreateOptionsMenuV2(OptionsMenuBehaviour optionsMenuBehaviour)
+    {
+        if (!OptionsBaseMenu)
+        {
+            log.Warn("OptionsBaseMenu is null, creating new one.");
+            Utilities.RunWithLogging(
+                () => OptionsBaseMenu = Object.Instantiate(popup2, optionsMenuBehaviour.transform), 
+                "Instantiated OptionsBaseMenu from popup2");
+        }
 
+        behaviour = optionsMenuBehaviour;
+        OptionsBaseMenu.name = "FlashlightUsOptionsMenu";
+        
+        var bg = OptionsBaseMenu.transform.Find("Background");
+        OptionsBaseMenu.gameObject.transform.SetParent(
+            HudManager.InstanceExists ? HudManager.Instance.transform : optionsMenuBehaviour.transform, false);
+        OptionsBaseMenu.transform.SetLocalZ(HudManager.InstanceExists ? -905f : -10f);
+        bg.localScale = new Vector3(1.9f, 1.9f, 1f);
+        bg.localPosition = new Vector3(0f, 0.8f, 1f);
+        
+        
+        
+        TryCreateModOptionsButton(optionsMenuBehaviour);
+        
         UiElement[] selectableButtons = optionsMenuBehaviour.ControllerSelectable.ToArray();
         PassiveButton leaveButton = null;
         PassiveButton returnButton = null;
-        for (int i = 0; i < selectableButtons.Length; i++)
+        
+        selectableButtons.ForEach(button =>
         {
-            var button = selectableButtons[i];
-            if (button == null)
-            {
-                continue;
-            }
-
-            if (button.name == "LeaveGameButton")
-            {
-                leaveButton = button.GetComponent<PassiveButton>();
-            }
-            else if (button.name == "ReturnToGameButton")
-            {
-                returnButton = button.GetComponent<PassiveButton>();
-            }
-        }
-
-        var generalTab = mouseMoveToggle.transform.parent.parent.parent;
-
-        var modOptionsButton = Object.Instantiate(mouseMoveToggle, generalTab);
-        modOptionsButton.transform.localPosition = new(-4f, 2f, -6f);
-        modOptionsButton.name = "ModOptionsButton";
-        modOptionsButton.Text.text = Translations.ModName;
-        modOptionsButton.Background.color = Color.yellow;
-        var modOptionsPassiveButton = modOptionsButton.GetComponent<PassiveButton>();
-        modOptionsPassiveButton.OnClick = new();
-        modOptionsPassiveButton.OnClick.AddListener(new Action(() => { CustomBackground.gameObject.SetActive(true); }));
-
-        if (leaveButton != null)
-        {
-            leaveButton.transform.localPosition = new(-1.35f, -2.411f, -1f);
-        }
-
-        if (returnButton != null)
-        {
-            returnButton.transform.localPosition = new(1.35f, -2.411f, -1f);
-        }
+            if (button == null) return;
+            if (button.name == "LeaveGameButton") leaveButton = button.GetComponent<PassiveButton>();
+            else if (button.name == "ReturnToGameButton") returnButton = button.GetComponent<PassiveButton>();
+        });
+        if (leaveButton != null) leaveButton.transform.localPosition = new Vector3(-1.35f, -2.411f, -1f);
+        if (returnButton != null) returnButton.transform.localPosition = new Vector3(1.35f, -2.411f, -1f);
     }
-    
+
     public static void OpenMenu()
     {
-        if (behaviour == null)
-        {
-            log.Warn("Behaviour is null, not opening menu.");
-            return;
-        }
-        
-        if (CustomBackground == null)
-        {
-            log.Exception("CustomBackground is null, not opening menu.");
-            return;
-        };
-        behaviour.gameObject.SetActive(true);
-        CustomBackground.gameObject.SetActive(true);
+        if (!OptionsBaseMenu) CheckMenu(behaviour);
+        OptionsBaseMenu.Show();
     }
-    
+
     public static void CloseMenu()
     {
-        if (behaviour == null)
+        if (!OptionsBaseMenu) CheckMenu(behaviour);
+        OptionsBaseMenu.Close();
+    }
+
+    public static void TryCreateModOptionsButton(OptionsMenuBehaviour optionsMenuBehaviour)
+    {
+        var startButton = MenuButton;
+        if (modOptionsButtonV2 != null)
         {
-            log.Warn("Behaviour is null, can't close menu.");
+            StaticLogger.Warn("ModOptionsButton already exists");
             return;
         }
+        modOptionsButtonV2 = Object.Instantiate(startButton, optionsMenuBehaviour.transform);
+        modOptionsButtonV2.gameObject.SetActive(true);
         
-        if (CustomBackground == null)
-        {
-            log.Exception("CustomBackground is null, can't clos menu.");
-            return;
-        };
-        behaviour.gameObject.SetActive(false);
-        CustomBackground.gameObject.SetActive(false);
+        Vector3 pos = Utilities.IsLotusLoaded() ? new Vector3(-3.37f, -1.75f, -10f) : new Vector3(4.15f, -2.65f, -10f);
+        Vector3 scale = Utilities.IsLotusLoaded() ? new Vector3(0.5f, 0.5f, 1f) : new Vector3(0.6f, 0.6f, 1f);
+
+        modOptionsButtonV2.transform.localPosition = pos;
+        modOptionsButtonV2.transform.localScale = scale;
+        modOptionsButtonV2.name = "ModOptionsButton";
+        
+        modOptionsButtonV2.GetComponentInChildren<TextTranslatorTMP>(true)?.DestroyImmediate();
+        modOptionsButtonV2.buttonText.text = Translations.ModName;
+        
+        modOptionsButtonV2.inactiveSprites.FindChild<SpriteRenderer>("Shine", true)?.gameObject.SetActive(false);
+        modOptionsButtonV2.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(1f, 0.750f, 0.500f, 1f);
+        modOptionsButtonV2.inactiveSprites.FindChild<SpriteRenderer>("Icon").sprite = null;
+        
+        modOptionsButtonV2.activeSprites.FindChild<SpriteRenderer>("Shine", true)?.gameObject.SetActive(false);
+        modOptionsButtonV2.activeSprites.GetComponent<SpriteRenderer>().color = new Color(.5f, 1f, 0.6f, 1f);
+        modOptionsButtonV2.activeSprites.FindChild<SpriteRenderer>("Icon").sprite = null;
+
+        var modOptionsPassiveButton = modOptionsButtonV2.GetComponent<PassiveButton>();
+        modOptionsPassiveButton.OnClick = new();
+        modOptionsPassiveButton.OnClick.AddListener(new Action(OpenMenu));
     }
 
     public static OptionsMenuItem Create(string label, string objectName, Func<bool> getValue, Action<bool> setValue,

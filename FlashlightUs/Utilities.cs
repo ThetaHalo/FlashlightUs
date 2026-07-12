@@ -81,6 +81,12 @@ public static class Utilities
             }
         }
     }
+
+    public static void RunWithLogging(Action action, string message)
+    {
+        log.Info(message);
+        action();
+    }
     
     public static GameModes GetCurrentGamemode() => GameOptionsManager.Instance.currentGameMode;
     public static bool IsHNS() => 

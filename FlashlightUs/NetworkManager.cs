@@ -16,10 +16,12 @@ public static class ModCalls
 public static class FlashlightUsNetworking
 {
     public static readonly HashSet<byte> ConfirmedPlayers = new();
+    public static bool HostHasMod = false;
 
     public static void SendIDPing(PlayerControl player, Action<bool> onResult)
     {
         if (player == null) return;
+        HostHasMod = true;
         byte playerId = player.PlayerId;
 
         ConfirmedPlayers.Remove(playerId);
@@ -39,6 +41,7 @@ public static class FlashlightUsNetworking
     public static void Identify()
     {
         StaticLogger.Warn("identify");
+        Utilities.RunWithLogging(() => HostHasMod = true, "Host has FlashlightUs");
         PlayerControl asker = Vents.GetLastSender(ModCalls.FlashlightUsIdentify);
         if (asker == null) return;
         Vents.FindRPC(ModCalls.FlashlightUsIdentifyReply)?.Send(new[] { asker.GetClientId() });

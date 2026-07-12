@@ -15,7 +15,6 @@ namespace FlashlightUs;
 
 [BepInPlugin(Id, "FlashlightUs", ModVersion)]
 [BepInProcess("Among Us.exe")]
-[BepInIncompatibility("com.discussions.LotusContinued")] // incompatible due to PL's custom options menu, I'm going to add compatibility later.
 [BepInDependency(Vents.Id)]
 public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
 {
@@ -25,9 +24,9 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
     public const bool Debug = false;
 
     public const string MajorVersion = "1";
-    public const string MinorVersion = "1";
+    public const string MinorVersion = "2";
     public const string PatchVersion = "0";
-    public const string BuildNumber = "0095";
+    public const string BuildNumber = "0166";
 
     public readonly GitVersion CurrentVersion = new(typeof(FlashlightUsPlugin).Assembly);
     public GitVersion Version() => CurrentVersion;
