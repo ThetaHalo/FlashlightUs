@@ -18,6 +18,7 @@ Notice: The flashlight distance follows the host's vision setting, meaning you c
 |:------------------------:|---------------------------------------------------------------|
 |    Enable Flashlight     | Enables the Flashlight (for you).                             |
 |     Force Flashlight     | Forces everyone in the lobby to use the Flashlight (as Host.) |
+|Enable Flashlight In Lobby| Enables the flashlight in the lobby dropship.                 |
 |  Kick Unmodded Players   | Kicks players who are not using the mod.                      |
 | Crewmate Flashlight Size | Changes the flashlight width as Crewmate-based roles.         |
 | Impostor Flashlight Size | Changes the flashlight width as Impostor-based roles.         |                    
@@ -26,8 +27,8 @@ __Any mod not listed here has not been tested. If you want your mod to be listed
 
 |   Mod Compatibility    | Status                   |
 |:----------------------:|:-------------------------| 
-|     Project: Lotus     | Incompatible ❌           | 
-|   Endless Host Roles   | Potentially Compatible ❓ |
+|     Project: Lotus     | Compatible!              | 
+|   Endless Host Roles   | Potentially Compatible?  |
 
 ## Gallery
 <img src=".github/1_options.png" width="100%" />
