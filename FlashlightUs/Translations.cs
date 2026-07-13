@@ -16,6 +16,7 @@ public class Translations
         [Localized(nameof(Options))] public static string Options = "Options";
         [Localized(nameof(Close))] public static string Close = "Close";
         [Localized("Enable Flashlight")] public static string EnableFlashlight = "Enable Flashlight";
+        [Localized("Enable Flashlight in Lobby")] public static string EnableFlashlightInLobby = "Enable Flashlight in Lobby";
         [Localized("Force Flashlight")] public static string ForceFlashlight = "Force Flashlight for Clients";
         [Localized("Kick Unmodded Players")] public static string KickUnmoddedPlayers = "Kick Unmodded Players";
         [Localized("Crewmate Flashlight Size")] public static string CrewmateFlashlightSize = "Crewmate Flashlight Size";

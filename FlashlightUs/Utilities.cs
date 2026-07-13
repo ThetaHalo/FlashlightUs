@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using AmongUs.GameOptions;
+using BepInEx.Unity.IL2CPP;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Options.UI;
@@ -15,12 +19,13 @@ public static class Utilities
     public static void KickWithMessage(this PlayerControl target, string message, bool banPlayer = false)
     {
         if (target == null) return;
+        var name = target.name + " ";
         message += "<size=0>"; // removes the "left the game" text.
-        target.SetName(message);
-        RpcV3.Immediate(target.NetId, RpcCalls.SetName).Write(target.Data.NetId).Write(message).Send();
+        target.SetName(name + message);
+        RpcV3.Immediate(target.NetId, RpcCalls.SetName).Write(target.Data.NetId).Write(name + message).Send();
         Async.Schedule(() =>
         {
-            target.SetName(message);
+            target.SetName(name + message);
             AmongUsClient.Instance.KickPlayer(target.GetClientId(), banPlayer);
         }, NetUtils.DeriveDelay(0.2f));
     }
@@ -36,7 +41,7 @@ public static class Utilities
             log.Warn("Can't call SendNotification() before HudManager is initialized.");
             return;
         }
-        log.Info($"Sending notification: {message} with sprite {sprite}");
+        log.Info($"Sending notification: {message}");
         
         NotificationPopper notifier = DestroyableSingleton<HudManager>.Instance.Notifier;
         LobbyNotificationMessage newMessage = UnityEngine.Object.Instantiate<LobbyNotificationMessage>(notifier.notificationMessageOrigin, Vector3.zero, Quaternion.identity, notifier.transform);
@@ -44,7 +49,7 @@ public static class Utilities
         newMessage.SetUp("  " + message.Trim(), sprite, Color.white, (Action)(() => notifier.OnMessageDestroy(newMessage)));
         notifier.ShiftMessages();
         notifier.AddMessageToQueue(newMessage);
-        SoundManager.Instance.PlaySound(notifier.playerDisconnectSound, false, 1f, null);
+        SoundManager.Instance.PlaySound(notifier.settingsChangeSound, false, 1f, null);
     }
     
     // https://github.com/Lotus-AU/VentFramework-Continued/blob/998678ca83415b8a22adcd294e7e5a9a37630907/src/Utilities/AssetLoader.cs#L9
@@ -78,4 +83,19 @@ public static class Utilities
             }
         }
     }
+
+    public static void RunWithLogging(Action action, string message)
+    {
+        log.Info(message);
+        action();
+    }
+    
+    public static GameModes GetCurrentGamemode() => GameOptionsManager.Instance.currentGameMode;
+    public static bool IsHNS() => 
+        GetCurrentGamemode() == GameModes.HideNSeek || GetCurrentGamemode() == GameModes.SeekFools;
+
+    public static bool IsLotusLoaded() =>
+        IL2CPPChainloader.Instance.Plugins.ContainsKey("com.discussions.LotusContinued");
+    
+    public static IEnumerable<int> GetAllClientIds() => PlayerControl.AllPlayerControls.ToArray().Select(p => p.GetClientId());
 }
