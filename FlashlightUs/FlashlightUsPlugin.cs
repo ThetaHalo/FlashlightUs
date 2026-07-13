@@ -1,15 +1,21 @@
 ﻿global using VentLib.Logging;
 global using Object = UnityEngine.Object;
+using System;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using FlashlightUs;
 using FlashlightUs.Networking;
+using FlashlightUs.UI;
+using FlashlightUs.UI.Patches;
 using HarmonyLib;
 using VentLib;
+using VentLib.Utilities.Optionals;
 using VentLib.Version;
 using VentLib.Version.Git;
 using VentLib.Version.Updater;
+using VentLib.Version.Updater.Github;
+using Version = VentLib.Version.Version;
 
 [assembly: AssemblyVersion(FlashlightUsPlugin.ModVersion)]
 namespace FlashlightUs;
@@ -25,9 +31,9 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
     public const bool Debug = false;
 
     public const string MajorVersion = "1";
-    public const string MinorVersion = "2";
+    public const string MinorVersion = "3";
     public const string PatchVersion = "0";
-    public const string BuildNumber = "0166";
+    public const string BuildNumber = "0208";
 
     public readonly GitVersion CurrentVersion = new(typeof(FlashlightUsPlugin).Assembly);
     public GitVersion Version() => CurrentVersion;
@@ -51,7 +57,18 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
         VersionControl vc = VersionControl.For(this);
         vc.AddVersionReceiver(OnJoin);
         ModUpdater = ModUpdater.Default();
+        ModUpdater.RegisterReleaseCallback(BeginUpdate, true);
         ModUpdater.EstablishConnection();
+    }
+    
+    public static void BeginUpdate(Release release)
+    {
+        UnityOptional<ModUpdateMenu>.Of(ModUpdaterPatches.ModUpdateMenu).Handle(o => o.Open(), () => ModUpdaterPatches.IsReady = true);
+        ModUpdateMenu.AddUpdateItem("FlashlightUs", release.TagName, ex => ModUpdater.Update(errorCallback: ex)!);
+        Assembly ventAssembly = typeof(Vents).Assembly;
+
+        if (release.ContainsDLL($"{ventAssembly.GetName().Name!}.dll"))
+            ModUpdateMenu.AddUpdateItem("VentFrameworkContinued", null, ex => ModUpdater.Update(ventAssembly, ex)!);
     }
 
     // we ping instead of relying on vf stuff due to other vf mods possibly interfering with the proper way to check

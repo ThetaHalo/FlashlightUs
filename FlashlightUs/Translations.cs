@@ -22,4 +22,12 @@ public class Translations
         [Localized("Crewmate Flashlight Size")] public static string CrewmateFlashlightSize = "Crewmate Flashlight Size";
         [Localized("Impostor Flashlight Size")] public static string ImpostorFlashlightSize = "Impostor Flashlight Size";
     }
+    
+    [Localized("ModUpdater")]
+    public static class ModUpdater
+    {
+        [Localized("StarlightUpdateAvailable")] public static string StarlightUpdateAvailable = "FlashlightUs Update Available!\n<size=75%>Update inside the Starlight App</size>";
+        [Localized("PCUpdateAvailable")] public static string PCUpdateAvailable = "FlashlightUs Update Available!\n<size=75%>Go to FlashlightUs Options to update!</size>";
+        [Localized("Update")] public static string Update = "Update";
+    }
 }

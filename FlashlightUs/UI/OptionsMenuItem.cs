@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using FlashlightUs.UI.Patches;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 using VentLib.Utilities.Extensions;
 
 
@@ -30,7 +32,6 @@ public class OptionsMenuItem
     public static GenericPopup OptionsBaseMenu;
     public static PassiveButton MenuButton;
     
-    private static ToggleButtonBehaviour modOptionsButton;
     public static PassiveButton modOptionsButtonV2;
     
     private static int numOptions = 0;
@@ -171,6 +172,9 @@ public class OptionsMenuItem
         behaviour = optionsMenuBehaviour;
         OptionsBaseMenu.name = "FlashlightUsOptionsMenu";
         
+        var exitButton = OptionsBaseMenu.transform.Find("ExitGame");
+        exitButton.transform.localPosition = new Vector3(1.8f, -0.6f, -1f);
+        
         var bg = OptionsBaseMenu.transform.Find("Background");
         OptionsBaseMenu.gameObject.transform.SetParent(
             HudManager.InstanceExists ? HudManager.Instance.transform : optionsMenuBehaviour.transform, false);
@@ -178,9 +182,23 @@ public class OptionsMenuItem
         bg.localScale = new Vector3(1.9f, 1.9f, 1f);
         bg.localPosition = new Vector3(0f, 0.8f, 1f);
         
-        
-        
         TryCreateModOptionsButton(optionsMenuBehaviour);
+
+        if (FlashlightUsPlugin.ModUpdater.HasUpdate)
+        {
+            if (PlayerControl.LocalPlayer != null) return;
+            
+            var updateBtn = Object.Instantiate(exitButton, OptionsBaseMenu.transform);
+            updateBtn.GetComponentInChildren<TextTranslatorTMP>().DestroyImmediate();
+            updateBtn.GetComponentInChildren<TextMeshPro>().text = "Update Mod!";
+            var actualBtn = updateBtn.GetComponent<PassiveButton>();
+            
+            exitButton.transform.localPosition = new Vector3(-1.8f, -0.6f, -1f);
+            updateBtn.transform.localPosition = new Vector3(1.8f, -0.6f, -1f);
+
+            actualBtn.OnClick = new Button.ButtonClickedEvent();
+            actualBtn.OnClick.AddListener(new Action(() => ModUpdaterPatches.ModUpdateMenu.Open()));
+        }
         
         UiElement[] selectableButtons = optionsMenuBehaviour.ControllerSelectable.ToArray();
         PassiveButton leaveButton = null;
@@ -239,7 +257,11 @@ public class OptionsMenuItem
 
         var modOptionsPassiveButton = modOptionsButtonV2.GetComponent<PassiveButton>();
         modOptionsPassiveButton.OnClick = new();
-        modOptionsPassiveButton.OnClick.AddListener(new Action(OpenMenu));
+        modOptionsPassiveButton.OnClick.AddListener(new Action(() =>
+        {
+            if (OptionsBaseMenu.gameObject.activeSelf) CloseMenu();
+            else OpenMenu();
+        }));
     }
 
     public static OptionsMenuItem Create(string label, string objectName, Func<bool> getValue, Action<bool> setValue,
