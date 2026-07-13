@@ -4,6 +4,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using FlashlightUs;
+using FlashlightUs.Networking;
 using HarmonyLib;
 using VentLib;
 using VentLib.Version;
@@ -58,7 +59,7 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
     {
         if (player == null) return;
         
-        FlashlightUsNetworking.SendIDPing(player, isFlashlightUs =>
+        NetworkManager.SendIDPing(player, isFlashlightUs =>
         {
             if (isFlashlightUs)
             {

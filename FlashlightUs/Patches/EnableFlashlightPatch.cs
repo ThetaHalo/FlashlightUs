@@ -1,5 +1,6 @@
 ﻿using System;
 using AmongUs.Data;
+using FlashlightUs.Networking;
 using HarmonyLib;
 using UnityEngine;
 using VentLib.Utilities;
@@ -66,7 +67,7 @@ public static class EnableFlashlightInLobbyPatch
 {
     public static void Postfix()
     {
-        FlashlightUsNetworking.HostHasMod = AmongUsClient.Instance.AmHost;
+        NetworkManager.HostHasMod = AmongUsClient.Instance.AmHost;
         if (!FlashlightUsOptions.EnableFlashlightInLobbyValue) return;
         Async.WaitUntil(() => PlayerControl.LocalPlayer, p => p != null, p =>
         {

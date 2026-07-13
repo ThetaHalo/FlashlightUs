@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using FlashlightUs.Networking;
+using UnityEngine;
 using VentLib.Options;
 using VentLib.Options.UI;
 using VentLib.Utilities.Attributes;
@@ -180,22 +181,22 @@ public static class FlashlightUsOptions
     {
         bool amHost = AmongUsClient.Instance.AmHost;
         bool inLobby = LobbyBehaviour.Instance != null;
-        bool anyModdedPlayers = FlashlightUsNetworking.ConfirmedPlayers.Count == 0;
+        bool anyModdedPlayers = NetworkManager.ConfirmedPlayers.Count == 0;
 
         if (inLobby && amHost)
         {
             Utilities.RunWithLogging(() => PlayerControl.LocalPlayer.AdjustLighting(),
-                $"AdjustLighting, in lobby and am host. HostHasMod={FlashlightUsNetworking.HostHasMod}");
+                $"AdjustLighting, in lobby and am host. HostHasMod={NetworkManager.HostHasMod}");
         }
-        else if (!amHost && !FlashlightUsNetworking.HostHasMod)
+        else if (!amHost && !NetworkManager.HostHasMod)
         {
             Utilities.RunWithLogging(() => PlayerControl.LocalPlayer.AdjustLighting(),
-                $"AdjustLighting, not host, HostHasMod={FlashlightUsNetworking.HostHasMod}");
+                $"AdjustLighting, not host, HostHasMod={NetworkManager.HostHasMod}");
         }
         else if (!anyModdedPlayers && amHost)
         {
             Utilities.RunWithLogging(() => PlayerControl.LocalPlayer.AdjustLighting(),
-                $"AdjustLighting, am host, HostHasMod={FlashlightUsNetworking.HostHasMod}");
+                $"AdjustLighting, am host, HostHasMod={NetworkManager.HostHasMod}");
         }
         else
         {

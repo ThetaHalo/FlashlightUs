@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
@@ -94,4 +96,6 @@ public static class Utilities
 
     public static bool IsLotusLoaded() =>
         IL2CPPChainloader.Instance.Plugins.ContainsKey("com.discussions.LotusContinued");
+    
+    public static IEnumerable<int> GetAllClientIds() => PlayerControl.AllPlayerControls.ToArray().Select(p => p.GetClientId());
 }

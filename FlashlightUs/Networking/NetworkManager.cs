@@ -5,15 +5,9 @@ using VentLib;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities;
 
-namespace FlashlightUs;
+namespace FlashlightUs.Networking;
 
-public static class ModCalls
-{
-    public const uint FlashlightUsIdentify = 0452-9;
-    public const uint FlashlightUsIdentifyReply = 0453-0;
-}
-
-public static class FlashlightUsNetworking
+public static class NetworkManager
 {
     public static readonly HashSet<byte> ConfirmedPlayers = new();
     public static bool HostHasMod = false;
@@ -26,12 +20,12 @@ public static class FlashlightUsNetworking
 
         ConfirmedPlayers.Remove(playerId);
         Vents.FindRPC(ModCalls.FlashlightUsIdentify)?.Send(new[] { player.GetClientId() });
-        StaticLogger.Warn($"ping sent to playerId={playerId}");
+        StaticLogger.Trace($"ping sent to playerId={playerId}");
 
         Async.Schedule(() =>
         {
             bool stillInGame = PlayerControl.AllPlayerControls.ToArray().Any(p => p.PlayerId == playerId);
-            StaticLogger.Warn($"async finished, stillInGame={stillInGame}, confirmed={ConfirmedPlayers.Contains(playerId)}");
+            StaticLogger.Trace($"async finished, stillInGame={stillInGame}, confirmed={ConfirmedPlayers.Contains(playerId)}");
             if (!stillInGame) return;
             onResult(ConfirmedPlayers.Contains(playerId));
         }, NetUtils.DeriveDelay(4f));
@@ -40,7 +34,7 @@ public static class FlashlightUsNetworking
     [ModRPC(ModCalls.FlashlightUsIdentify, RpcActors.Host)]
     public static void Identify()
     {
-        StaticLogger.Warn("identify");
+        StaticLogger.Trace("identify");
         Utilities.RunWithLogging(() => HostHasMod = true, "Host has FlashlightUs");
         PlayerControl asker = Vents.GetLastSender(ModCalls.FlashlightUsIdentify);
         if (asker == null) return;
