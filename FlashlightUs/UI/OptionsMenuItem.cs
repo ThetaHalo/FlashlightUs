@@ -181,9 +181,10 @@ public class OptionsMenuItem
         
         TryCreateModOptionsButton(optionsMenuBehaviour);
 
-        if (FlashlightUsPlugin.ModUpdater.HasUpdate)
+        if (FlashlightUsPlugin.ModUpdater.HasUpdate && !OperatingSystem.IsAndroid())
         {
             if (PlayerControl.LocalPlayer != null) return;
+            
             
             var updateBtn = Object.Instantiate(exitButton, OptionsBaseMenu.transform);
             updateBtn.GetComponentInChildren<TextTranslatorTMP>().DestroyImmediate();
