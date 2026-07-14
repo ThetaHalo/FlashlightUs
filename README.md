@@ -14,6 +14,8 @@ You may use this in public lobbies, however members of the lobby will also requi
 
 Notice: The flashlight distance follows the host's vision setting, meaning you can still see only as far as the host intends you to. This will not be configurable as it would be considered cheating to see farther than you should be able to.
 
+This mod is also 100% localizable, you can modify *most* strings to whatever you wish.
+
 |           Option           | Description                                                   |
 | :------------------------: |---------------------------------------------------------------|
 |     Enable Flashlight      | Enables the Flashlight (for you).                             |
@@ -25,10 +27,12 @@ Notice: The flashlight distance follows the host's vision setting, meaning you c
 
 __Any mod not listed here has not been tested. If you want your mod to be listed here and are willing to test it, please create an issue.__
 
-|   Mod Compatibility    | Status                   |
-|:----------------------:|:-------------------------| 
-|     Project: Lotus     | Compatible!              | 
-|   Endless Host Roles   | Potentially Compatible?  |
+| Mod Compatibility  | Status      |
+|:------------------:|:------------| 
+|   Project: Lotus   | Compatible! | 
+| LaunchpadReloaded  | Compatible! |
+|  Town of Us Mira   | Compatible! |
+| Endless Host Roles | Compatible! |
 
 ## Gallery
 <img src=".github/1_options.png" width="100%" />

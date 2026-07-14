@@ -1,6 +1,5 @@
 ﻿global using VentLib.Logging;
 global using Object = UnityEngine.Object;
-using System;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -63,7 +62,7 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
     
     public static void BeginUpdate(Release release)
     {
-        UnityOptional<ModUpdateMenu>.Of(ModUpdaterPatches.ModUpdateMenu).Handle(o => o.Open(), () => ModUpdaterPatches.IsReady = true);
+        UnityOptional<ModUpdateMenu>.Of(ModUpdaterPatches.ModUpdateMenu).Handle(o => o.Open(), () => {});
         ModUpdateMenu.AddUpdateItem("FlashlightUs", release.TagName, ex => ModUpdater.Update(errorCallback: ex)!);
         Assembly ventAssembly = typeof(Vents).Assembly;
 

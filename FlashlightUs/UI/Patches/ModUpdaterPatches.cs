@@ -3,9 +3,6 @@ using HarmonyLib;
 using TMPro;
 using Twitch;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
-using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
 namespace FlashlightUs.UI.Patches;
@@ -15,8 +12,6 @@ public class ModUpdaterPatches
 {
     public static ModUpdateMenu ModUpdateMenu;
     internal static UnityOptional<GameObject> UpdateButton = UnityOptional<GameObject>.Null();
-
-    public static bool IsReady;
     
     // based on portions of https://github.com/Lotus-AU/LotusContinued/blob/8a00694ae082339c9abad299945ce1f1522be74c/src/GUI/Patches/SplashPatch.cs
     public static void Prefix(MainMenuManager __instance)

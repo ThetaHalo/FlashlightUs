@@ -1,12 +1,10 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using FlashlightUs.UI.Patches;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using VentLib;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
@@ -51,7 +49,7 @@ public class ModUpdateMenu: MonoBehaviour
         UpdateBackground.transform.localScale = new Vector3(1.6f, 1.6f, 1f);
         UpdateBackground.name = "Updater";
         UpdateBackground.TextAreaTMP.transform.localPosition = new Vector3(-0.725f, 0.75f, -1f);
-        UpdateBackground.TextAreaTMP.text = "FlashlightUs Updater";
+        UpdateBackground.TextAreaTMP.text = Translations.ModUpdater.MenuTitle;
         
         ItemContainer = new GameObject("ItemContainer");
         ItemContainer.transform.SetParent(UpdateBackground.transform, false);
@@ -87,7 +85,7 @@ public class ModUpdateMenu: MonoBehaviour
             }
             log.Info("Mods updated");
             DoneUpdating = true;
-            UpdateButton.GetComponentInChildren<TextMeshPro>().text = "Exit Game";
+            UpdateButton.GetComponentInChildren<TextMeshPro>().text = Translations.ModUpdater.ExitGame;
         }));
         
         ExitButton.GetComponentInChildren<TextTranslatorTMP>().DestroyImmediate();
@@ -107,7 +105,7 @@ public class ModUpdateMenu: MonoBehaviour
         TextMeshPro label = rowObj.GetComponent<TextMeshPro>();
         label.alignment = TextAlignmentOptions.BaselineLeft;
         label.fontSize = 1.5f;
-        label.text = $"- <u>{item.Name}: {item.Version ?? "?"} - Pending</u>";
+        label.text = $"- <u>{item.Name}: {item.Version ?? "?"} - {Translations.ModUpdater.Pending}</u>";
 
         item.Label = label;
     }
@@ -117,8 +115,8 @@ public class ModUpdateMenu: MonoBehaviour
         AnchorObj.SetActive(isOpen = true);
         UpdateBackground.gameObject.SetActive(true);
         
-        UpdateButton.GetComponentInChildren<TextMeshPro>().text = "Update";
-        ExitButton.GetComponentInChildren<TextMeshPro>().text = "Exit";
+        UpdateButton.GetComponentInChildren<TextMeshPro>().text = Translations.ModUpdater.Update;
+        ExitButton.GetComponentInChildren<TextMeshPro>().text = Translations.OptionsMenu.Close;
     }
     
     public void Close()
@@ -168,14 +166,16 @@ public class ModUpdateMenu: MonoBehaviour
             if (Label == null) return;
             string stateText = UpdateState switch
             {
-                UpdateState.Updating => "Updating...",
-                UpdateState.Complete => "Done",
-                _ => "Pending"
+                UpdateState.Updating => Translations.ModUpdater.Updating,
+                UpdateState.Complete => Translations.ModUpdater.Done,
+                UpdateState.Failed => Translations.ModUpdater.Failed,
+                _ => Translations.ModUpdater.Pending
             };
             Color color = UpdateState switch
             {
                 UpdateState.Updating => Color.yellow,
                 UpdateState.Complete => Color.green,
+                UpdateState.Failed => Color.red,
                 _ => Color.white
             };
             Label.text = color.Colorize($"- <u>{Name}: {Version ?? "?"} - {stateText}</u>");
@@ -183,7 +183,7 @@ public class ModUpdateMenu: MonoBehaviour
 
         public void HandleException(Exception exception)
         {
-            UpdateState = UpdateState.None;
+            UpdateState = UpdateState.Failed;
             RefreshLabel();
             log.Exception($"Update failed: {exception}");
         }
@@ -193,7 +193,8 @@ public class ModUpdateMenu: MonoBehaviour
     {
         None,
         Updating,
-        Complete
+        Complete,
+        Failed
     }
     
     public delegate Progress<float> UpdateDelegate(Action<Exception> exception);

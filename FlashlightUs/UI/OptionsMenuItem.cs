@@ -49,8 +49,7 @@ public class OptionsMenuItem
             Label = label;
 
             var mouseMoveToggle = optionsMenuBehaviour.DisableMouseMovement;
-
-            // Create menu
+            
             CheckMenu(optionsMenuBehaviour);
             
             // Generate Buttons (google translated)
@@ -93,8 +92,7 @@ public class OptionsMenuItem
 
             var mouseMoveToggle = optionsMenuBehaviour.DisableMouseMovement;
             var musicSlider = optionsMenuBehaviour.MusicSlider;
-
-            // Create menu if null
+            
             CheckMenu(optionsMenuBehaviour);
 
             // sliders take a whole row, if there's only 1 button, we just skip
@@ -139,7 +137,6 @@ public class OptionsMenuItem
     
     private static void CheckMenu(OptionsMenuBehaviour optionsMenuBehaviour)
     {
-        
         log.Trace($"CheckMenu called. builtFor == optionsMenuBehaviour: {builtFor == optionsMenuBehaviour}");
 
         if (builtFor == optionsMenuBehaviour) return;
@@ -190,7 +187,7 @@ public class OptionsMenuItem
             
             var updateBtn = Object.Instantiate(exitButton, OptionsBaseMenu.transform);
             updateBtn.GetComponentInChildren<TextTranslatorTMP>().DestroyImmediate();
-            updateBtn.GetComponentInChildren<TextMeshPro>().text = "Update Mod!";
+            updateBtn.GetComponentInChildren<TextMeshPro>().text = Translations.ModUpdater.UpdateMod;
             var actualBtn = updateBtn.GetComponent<PassiveButton>();
             
             exitButton.transform.localPosition = new Vector3(-1.8f, -0.6f, -1f);

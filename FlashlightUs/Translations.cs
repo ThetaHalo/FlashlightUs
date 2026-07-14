@@ -29,5 +29,12 @@ public class Translations
         [Localized("StarlightUpdateAvailable")] public static string StarlightUpdateAvailable = "FlashlightUs Update Available!\n<size=75%>Update inside the Starlight App</size>";
         [Localized("PCUpdateAvailable")] public static string PCUpdateAvailable = "FlashlightUs Update Available!\n<size=75%>Go to FlashlightUs Options to update!</size>";
         [Localized("Update")] public static string Update = "Update";
+        [Localized("UpdateMod")] public static string UpdateMod = "Update Mod!";
+        [Localized("MenuTitle")] public static string MenuTitle = "FlashlightUs Updater";
+        [Localized("ExitGame")] public static string ExitGame = "Exit Game";
+        [Localized("Updating")] public static string Updating = "Updating...";
+        [Localized("Pending")] public static string Pending = "Pending";
+        [Localized("Done")] public static string Done = "Done";
+        [Localized("Failed")] public static string Failed = "Failed";
     }
 }

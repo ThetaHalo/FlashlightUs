@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using VentLib.Utilities.Harmony.Attributes;
 
 namespace FlashlightUs.UI.Patches;
 
