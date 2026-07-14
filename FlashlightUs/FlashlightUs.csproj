@@ -18,7 +18,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Condition="$(Debug) == 'true'" Include="../../VentFramework-Continued/bin/Debug/net6.0/VentFrameworkContinued.dll">
+        <Reference Condition="$(Debug) == 'true'" Include="../VFC/VentFrameworkContinued.dll">
             <IncludeAssets>runtime; compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </Reference>

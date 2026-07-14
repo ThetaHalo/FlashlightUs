@@ -27,12 +27,12 @@ This mod is also 100% localizable, you can modify *most* strings to whatever you
 
 __Any mod not listed here has not been tested. If you want your mod to be listed here and are willing to test it, please create an issue.__
 
-| Mod Compatibility  | Status      |
-|:------------------:|:------------| 
-|   Project: Lotus   | Compatible! | 
-| LaunchpadReloaded  | Compatible! |
-|  Town of Us Mira   | Compatible! |
-| Endless Host Roles | Compatible! |
+| Mod Compatibility  | Status      |                     Notes                     |
+|:------------------:|:------------|:---------------------------------------------:|
+|   Project: Lotus   | Compatible! |                       .                       | 
+| LaunchpadReloaded  | Compatible! | Mouse Movement Text will show in Options Menu |
+|  Town of Us Mira   | Compatible! | Mouse Movement Text will show in Options Menu 
+| Endless Host Roles | Compatible! |                       .                       |
 
 ## Gallery
 <img src=".github/1_options.png" width="100%" />
