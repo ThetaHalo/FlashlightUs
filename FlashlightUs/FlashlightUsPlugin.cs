@@ -31,8 +31,8 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
 
     public const string MajorVersion = "1";
     public const string MinorVersion = "2";
-    public const string PatchVersion = "1";
-    public const string BuildNumber = "0209";
+    public const string PatchVersion = "3";
+    public const string BuildNumber = "0212";
 
     public readonly GitVersion CurrentVersion = new(typeof(FlashlightUsPlugin).Assembly);
     public GitVersion Version() => CurrentVersion;
@@ -66,7 +66,7 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
         ModUpdateMenu.AddUpdateItem("FlashlightUs", release.TagName, ex => ModUpdater.Update(errorCallback: ex)!);
         Assembly ventAssembly = typeof(Vents).Assembly;
 
-        if (release.ContainsDLL($"{ventAssembly.GetName().Name!}.dll"))
+        if (release.ContainsDLL($"{ventAssembly.GetName().Name!}.dll") && !Utilities.IsLotusLoaded())
             ModUpdateMenu.AddUpdateItem("VentFrameworkContinued", null, ex => ModUpdater.Update(ventAssembly, ex)!);
     }
 

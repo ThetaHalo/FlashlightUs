@@ -235,23 +235,28 @@ public class OptionsMenuItem
         modOptionsButtonV2 = Object.Instantiate(startButton, optionsMenuBehaviour.transform);
         modOptionsButtonV2.gameObject.SetActive(true);
         
-        Vector3 pos = Utilities.IsLotusLoaded() ? new Vector3(-3.37f, -1.75f, -10f) : new Vector3(4.15f, -2.65f, -10f);
+        Vector3 pos = Utilities.IsLotusLoaded() ? new Vector3(-3.37f, -2.05f, -10f) : new Vector3(4.15f, -2.65f, -10f);
         Vector3 scale = Utilities.IsLotusLoaded() ? new Vector3(0.5f, 0.5f, 1f) : new Vector3(0.6f, 0.6f, 1f);
-
+        
+        modOptionsButtonV2.gameObject.layer = LayerMask.NameToLayer("UI");
         modOptionsButtonV2.transform.localPosition = pos;
         modOptionsButtonV2.transform.localScale = scale;
         modOptionsButtonV2.name = "ModOptionsButton";
         
         modOptionsButtonV2.GetComponentInChildren<TextTranslatorTMP>(true)?.DestroyImmediate();
         modOptionsButtonV2.buttonText.text = Translations.ModName;
+
+        var inactive = modOptionsButtonV2.inactiveSprites;
+        var active = modOptionsButtonV2.activeSprites;
+        inactive.FindChild<SpriteRenderer>("Shine", true)?.gameObject.SetActive(false);
+        inactive.GetComponent<SpriteRenderer>().color = new Color(1f, 0.750f, 0.500f, 1f);
+        inactive.FindChild<SpriteRenderer>("Icon").sprite = null;
+        inactive.layer = LayerMask.NameToLayer("UI");
         
-        modOptionsButtonV2.inactiveSprites.FindChild<SpriteRenderer>("Shine", true)?.gameObject.SetActive(false);
-        modOptionsButtonV2.inactiveSprites.GetComponent<SpriteRenderer>().color = new Color(1f, 0.750f, 0.500f, 1f);
-        modOptionsButtonV2.inactiveSprites.FindChild<SpriteRenderer>("Icon").sprite = null;
-        
-        modOptionsButtonV2.activeSprites.FindChild<SpriteRenderer>("Shine", true)?.gameObject.SetActive(false);
-        modOptionsButtonV2.activeSprites.GetComponent<SpriteRenderer>().color = new Color(.5f, 1f, 0.6f, 1f);
-        modOptionsButtonV2.activeSprites.FindChild<SpriteRenderer>("Icon").sprite = null;
+        active.FindChild<SpriteRenderer>("Shine", true)?.gameObject.SetActive(false);
+        active.GetComponent<SpriteRenderer>().color = new Color(.5f, 1f, 0.6f, 1f);
+        active.FindChild<SpriteRenderer>("Icon").sprite = null;
+        active.layer = LayerMask.NameToLayer("UI");
 
         var modOptionsPassiveButton = modOptionsButtonV2.GetComponent<PassiveButton>();
         modOptionsPassiveButton.OnClick = new();

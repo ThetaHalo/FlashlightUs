@@ -1,8 +1,10 @@
 ﻿using FlashlightUs.Networking;
+using Il2CppSystem;
 using UnityEngine;
 using VentLib.Options;
 using VentLib.Options.UI;
 using VentLib.Utilities.Attributes;
+using OperatingSystem = System.OperatingSystem;
 
 namespace FlashlightUs;
 
@@ -62,6 +64,7 @@ public static class FlashlightUsOptions
             field = value;
             EnableFlashlightInLobby.SetHardValue(value);
             if (PlayerControl.LocalPlayer != null) AdjustLighting();
+            if (OperatingSystem.IsAndroid() && HudManager.InstanceExists) HudManager.Instance.SetTouchType(ControlTypes.VirtualJoystick);
         }
     }
 

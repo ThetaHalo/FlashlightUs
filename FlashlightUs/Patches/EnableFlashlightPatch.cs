@@ -38,9 +38,12 @@ public static class ForceRightJoystickPatch
 
         var instance = Object.Instantiate(__instance.RightVJoystick, __instance.transform, false);
         if (instance == null) return;
-
+        var pos = instance.transform.position;
+        if (LobbyBehaviour.Instance != null) pos = new Vector3(pos.x - .25f, pos.y, pos.z);
+        
+        var enable = LobbyBehaviour.Instance == null || FlashlightUsOptions.EnableFlashlightInLobbyValue;
         __instance.joystickR = instance.GetComponent<VirtualJoystick>();
-        __instance.joystickR.ToggleVisuals(LobbyBehaviour.Instance == null);
+        __instance.joystickR.ToggleVisuals(enable);
         __instance.SetJoystickSize(DataManager.Settings.Input.TouchJoystickSize);
     }
 }
