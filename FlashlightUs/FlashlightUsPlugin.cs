@@ -31,7 +31,7 @@ public partial class FlashlightUsPlugin : BasePlugin, IGitVersionEmitter
 
     public const string MajorVersion = "1";
     public const string MinorVersion = "2";
-    public const string PatchVersion = "3";
+    public const string PatchVersion = "2";
     public const string BuildNumber = "0212";
 
     public readonly GitVersion CurrentVersion = new(typeof(FlashlightUsPlugin).Assembly);
